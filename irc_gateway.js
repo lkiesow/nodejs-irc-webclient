@@ -6,9 +6,9 @@ var app = require('http').createServer(handler)
 
 
 /**
- * Webserver to deliver client files 
- * @param req
- * @param res
+ * \brief Webserver to deliver client files.
+ * @param req the request
+ * @param res the response
  */
 app.listen(80);
 function handler (req, res) {
@@ -25,7 +25,7 @@ function (err, data) {
 
 
 /**
- * 
+ * \brief This function handles the connection to the clients.
  */
 io.sockets.on('connection', function (webSocket) {
 	var tcpStream = new net.Stream;
@@ -34,7 +34,7 @@ io.sockets.on('connection', function (webSocket) {
 	webSocket.on('message', function (message) {
 		if(message.split(' ')[0] == 'CONNECT')
 		{
-			//connect to the given server via tcp
+			//connect to the given IRC server via TCP
 			var host = message.split(' ')[1].split(':')[0];
 			var port = message.split(' ')[1].split(':')[1];
 			console.log( 'connecting to '+host+':'+port+'…' );
@@ -42,7 +42,7 @@ io.sockets.on('connection', function (webSocket) {
 		}
 		else
 		{
-			//forward message to the remote server via tcp
+			//forward message to the remote server via TCP
 			tcpStream.write(message);
 		}
 	});
@@ -50,7 +50,7 @@ io.sockets.on('connection', function (webSocket) {
 	 * \brief This function handles the data received from the IRC server.
 	 **/
 	tcpStream.addListener("data", function (data) {
-		//forward data to webSocket
+		//forward data to websocket
 		webSocket.send(data);
 	});
 });
