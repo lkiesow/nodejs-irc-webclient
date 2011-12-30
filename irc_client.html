@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>JS IRC Client</title>
+</head>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+
+var socket = io.connect('127.0.0.1:80');
+socket.send("CONNECT irc.freenode.net:6667")
+socket.send("USER node.js-bot irc.freenode.net blubb :node.js.bot\n")
+socket.send("NICK node-js-bot\n")
+socket.send("JOIN #las-vegas-uos\n")
+
+socket.on('message', function (data) {
+    $("body").append( "<p>"+ data+"</p>");
+});
+
+</script>
+<body>
+
+</body>
+
+</html>

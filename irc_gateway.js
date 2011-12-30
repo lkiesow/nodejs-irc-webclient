@@ -1,71 +1,60 @@
 var net = require("net");
+var app = require('http').createServer(handler)
+, io = require('socket.io').listen(app)
+, fs = require('fs')
 
-
-function parse_msg( text ) {
-	var data = text.split( " ", 4 );
-	console.log( '--->> ' );
-	console.log( data );
-	if ( data.length == 4 && data[1] == 'PRIVMSG' ) {
-		var user = text.split( '!~' )[0].replace( ':', '' );
-		var message = text.replace( /^:[^:]*:/, '' ).replace( /[\n\r]/g, '' );
-		var receiver = null;
-		/* The person we want to answer (channel or user). */
-		if ( data[2].charAt(0) == '#' ) {
-			receiver = data[2]; // channel
-		} else {
-			receiver = user; // user
-		}
-		return { 
-				'valid'    : 1, 
-				'user'     : user, 
-				'channel'  : data[2], 
-				'receiver' : receiver, 
-				'message'  : message
-			}
-	} else {
-		// not a valid message
-		return { 'valid' : 0 }
-	}
-}
-
-
-var stream = new net.Stream;
-
-stream.setTimeout(0);
-stream.setEncoding("ascii");
 
 
 /**
- * \brief This function handles the data received from the IRC server.
- **/
-stream.addListener("data", function (data) {
+ * Webserver to deliver client files 
+ * @param req
+ * @param res
+ */
+app.listen(80);
+function handler (req, res) {
+fs.readFile(__dirname + '/irc_client.html',
+function (err, data) {
+  if (err) {
+    res.writeHead(500);
+    return res.end('Error loading index.html');
+  }
+  res.writeHead(200);
+  res.end(data);
+});
+}
 
-	console.log( '-lk-> ' + data + "\n" );
-	if ( data.search( /Message of the Day/ ) != -1 ) {
-		stream.write( "JOIN #las-vegas-uos\n" );
 
-	} else {
-		var lines = data.split( "\n" );
-		for ( var i = 0; i < lines.length; i++ ) {
-			if ( lines[i].search( /PING/ ) != -1 ) {
-				stream.write( 'PONG ' + lines[i].split( " " )[1] + "\n" );
-			} else {
-				var msg = parse_msg( lines[i] );
-				if ( msg.valid ) {
-					console.log( msg );
-				}
-			}
+/**
+ * 
+ */
+io.sockets.on('connection', function (webSocket) {
+	var tcpStream = new net.Stream;
+	tcpStream.setTimeout(0);
+	tcpStream.setEncoding("ascii");
+	webSocket.on('message', function (message) {
+		if(message.split(' ')[0] == 'CONNECT')
+		{
+			//connect to the given server via tcp
+			var host = message.split(' ')[1].split(':')[0];
+			var port = message.split(' ')[1].split(':')[1];
+			console.log( 'connecting to '+host+':'+port+'…' );
+					tcpStream.connect( port, host );
 		}
-	}
-
+		else
+		{
+			//forward message to the remote server via tcp
+			tcpStream.write(message);
+		}
+	});
+	/**
+	 * \brief This function handles the data received from the IRC server.
+	 **/
+	tcpStream.addListener("data", function (data) {
+		//forward data to webSocket
+		webSocket.send(data);
+	});
 });
 
-stream.addListener("end", function() {
-	console.log( "connection closed.\n" );
-});
 
-console.log( 'connecting to irc.freenode.net:6667…' );
 
-stream.connect( 6667, 'irc.freenode.net' );
-stream.write( "USER node.js-Bot irc.freenode.net blubb :node.js.bot\n" );
-stream.write( "NICK node-js-bot\n" );
+
