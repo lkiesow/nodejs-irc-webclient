@@ -47,6 +47,12 @@ io.sockets.on('connection', function (webSocket) {
 		}
 	});
 	/**
+	 * \brief this function closes the connection to the IRC server when the connection to the client is closed.
+	 */
+	webSocket.on('disconnect', function () {
+		tcpStream.end();
+	});
+	/**
 	 * \brief This function handles the data received from the IRC server.
 	 **/
 	tcpStream.addListener("data", function (data) {
