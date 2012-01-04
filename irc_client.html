@@ -8,27 +8,63 @@
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
 
-var socket = io.connect('127.0.0.1:80');
+function parse_msg( text ) {
+	var data = text.split( " ", 4 );
+	if ( data.length == 4 && data[1] == 'PRIVMSG' ) {
+		var user = text.split( '!~' )[0].replace( ':', '' );
+		var message = text.replace( /^:[^:]*:/, '' ).replace( /[\n\r]/g, '' );
+		var receiver = null;
+		/* The person we want to answer (channel or user). */
+		if ( data[2].charAt(0) == '#' ) {
+			receiver = data[2]; // channel
+		} else {
+			receiver = user; // user
+		}
+		return { 
+				'valid'    : 1, 
+				'user'     : user, 
+				'channel'  : data[2], 
+				'receiver' : receiver, 
+				'message'  : message
+			}
+	} else {
+		// not a valid message
+		return { 'valid' : 0 }
+	}
+}
+
+
+//var socket = io.connect( window.location.host );
+var socket = io.connect( '127.0.0.1:8080' );
 
 $(document).ready(function (){
-  $("#ui").hide();
-   
-  $("#connect-btn").click(function(e){
-    e.preventDefault();
-    $("#connect").hide();
-    $("#ui").show();
-    socket.send("CONNECT "+ $("#server").val());
-    socket.send("NICK "+ $("#nick").val() +"\n");
-    socket.send("USER "+ $("#nick").val() +" "+  $("#server").val().split(":")[0] + " blubb :"+$("#nick").val() +"\n");
-  });
+		$("#ui").hide();
 
-});
+		$("#connect-btn").click(function(e){
+			e.preventDefault();
+			$("#connect").hide();
+			$("#ui").show();
+			socket.send("CONNECT "+ $("#server").val());
+			socket.send("NICK "+ $("#nick").val() +"\n");
+			socket.send("USER "+ $("#nick").val() +" "+  $("#server").val().split(":")[0] + " blubb :"+$("#nick").val() +"\n");
+			});
+
+		});
 
 //socket.send("JOIN #las-vegas-uos\n");
 
 socket.on('message', function (data) {
-    $("body").append( "<p>"+ data+"</p>");
-});
+		$("body").append( "<pre>" + data + "</pre><br />");
+		var lines = data.split( "\r\n" );
+		for ( var i = 0; i < lines.length; i++ )  {
+			// play ping pong
+			if ( lines[i].match( /^PING.*/ ) ) {
+				socket.send( 'PONG ' + lines[i].split(' ')[1] + '\r\n' );
+			} else {
+				$("body").append( "<pre>" + lines[i] + "</pre><br />");
+			}
+		}
+	 });
 
 </script>
 <body>

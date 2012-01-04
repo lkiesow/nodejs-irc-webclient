@@ -10,7 +10,7 @@ var app = require('http').createServer(handler)
  * @param req the request
  * @param res the response
  */
-app.listen(80);
+app.listen(8080);
 function handler (req, res) {
 fs.readFile(__dirname + '/irc_client.html',
 function (err, data) {
