@@ -9,10 +9,22 @@
 <script type="text/javascript">
 
 var socket = io.connect('127.0.0.1:80');
-socket.send("CONNECT irc.freenode.net:6667")
-socket.send("USER node.js-bot irc.freenode.net blubb :node.js.bot\n")
-socket.send("NICK node-js-bot\n")
-socket.send("JOIN #las-vegas-uos\n")
+
+$(document).ready(function (){
+  $("#ui").hide();
+   
+  $("#connect-btn").click(function(e){
+    e.preventDefault();
+    $("#connect").hide();
+    $("#ui").show();
+    socket.send("CONNECT "+ $("#server").val());
+    socket.send("NICK "+ $("#nick").val() +"\n");
+    socket.send("USER "+ $("#nick").val() +" "+  $("#server").val().split(":")[0] + " blubb :"+$("#nick").val() +"\n");
+  });
+
+});
+
+//socket.send("JOIN #las-vegas-uos\n");
 
 socket.on('message', function (data) {
     $("body").append( "<p>"+ data+"</p>");
@@ -20,12 +32,23 @@ socket.on('message', function (data) {
 
 </script>
 <body>
-<section id="top-box" style="height:500px">
-  <section id="messages" style="float:left; height:100%"></section>
-  <aside id="userlist" style="float:right;width:20%; height:100%; background-color:#bbbbbb""></aside>
-</section>
-<section id="bottom-box">
-  <input type="text" id="msginput" style="width:80%"/><input type="submit"/>
-</section>
+	<div id="connect">
+		<form>
+			<label for="server">Server: </label><input type="text" id="server" required value="irc.freenode.net:6667" /><br>
+			<input type="text" id="nick" required placeholder="Your nickname here" />
+			<input type="submit" id="connect-btn" value="connect" />
+		</form>
+	</div>
+	<div id="ui">
+		<section id="top-box" style="height: 500px">
+			<section id="messages" style="float: left; height: 100%"></section>
+			<aside id="userlist"
+				style="float: right; width: 20%; height: 100%; background-color: #bbbbbb"></aside>
+		</section>
+		<section id="bottom-box">
+			<input type="text" id="msginput" style="width: 80%" /><input
+				type="submit" />
+		</section>
+	</div>
 </body>
 </html>
