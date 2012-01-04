@@ -60,7 +60,10 @@ socket.on('message', function (data) {
 			if ( lines[i].match( /^PING.*/ ) ) {
 				socket.send( 'PONG ' + lines[i].split(' ')[1] + '\r\n' );
 			} else if ( lines[i] != ''  ) {
-				$("#messages").append( "<li>" + lines[i] + "</li>");
+				$("#messages").append( "<li>" + lines[i] + "</li>")
+					.stop().animate({scrollTop: 
+						$("#messages").children().last().offset().top
+						+ $("#messages").children().last().outerHeight() + 100 }, 500);
 			}
 		}
 	 });
@@ -78,7 +81,7 @@ socket.on('message', function (data) {
 		<div id="top-box" style="height: 500px; display: table; width: 100%;">
 			<div style="display: table-row; width: 100%;">
 				<div style="display: table-cell;">
-				<ul style="height: 500px; width: 95%; display: block; overflow-y: scroll; overflow-x: hidden; list-style-type: none;" id="messages">
+				<ul style="height: 500px; width: 95%; font-size: smaller; display: block; overflow-y: scroll; overflow-x: hidden; list-style-type: none;" id="messages">
 					<li>Welcome to IRC webclient</li>
 				</ul>
 			</div>
