@@ -54,37 +54,42 @@ $(document).ready(function (){
 //socket.send("JOIN #las-vegas-uos\n");
 
 socket.on('message', function (data) {
-		$("body").append( "<pre>" + data + "</pre><br />");
 		var lines = data.split( "\r\n" );
 		for ( var i = 0; i < lines.length; i++ )  {
 			// play ping pong
 			if ( lines[i].match( /^PING.*/ ) ) {
 				socket.send( 'PONG ' + lines[i].split(' ')[1] + '\r\n' );
-			} else {
-				$("body").append( "<pre>" + lines[i] + "</pre><br />");
+			} else if ( lines[i] != ''  ) {
+				$("#messages").append( "<li>" + lines[i] + "</li>");
 			}
 		}
 	 });
 
 </script>
 <body>
-	<div id="connect">
+	<div id="connect" style="text-align: center;">
 		<form>
 			<label for="server">Server: </label><input type="text" id="server" required value="irc.freenode.net:6667" /><br>
 			<input type="text" id="nick" required placeholder="Your nickname here" />
 			<input type="submit" id="connect-btn" value="connect" />
 		</form>
 	</div>
-	<div id="ui">
-		<section id="top-box" style="height: 500px">
-			<section id="messages" style="float: left; height: 100%"></section>
-			<aside id="userlist"
-				style="float: right; width: 20%; height: 100%; background-color: #bbbbbb"></aside>
-		</section>
-		<section id="bottom-box">
+	<div id="ui" style="display: table; width: 100%;">
+		<div id="top-box" style="height: 500px; display: table; width: 100%;">
+			<div style="display: table-row; width: 100%;">
+				<div style="display: table-cell;">
+				<ul style="height: 500px; width: 95%; display: block; overflow-y: scroll; overflow-x: hidden; list-style-type: none;" id="messages">
+					<li>Welcome to IRC webclient</li>
+				</ul>
+			</div>
+			<div id="userlist"
+					style="width: 18%; height: 100%; background-color: #bbbbbb; display: table-cell; overflow: scroll;"></div>
+			</div>
+		</div>
+		<div id="bottom-box">
 			<input type="text" id="msginput" style="width: 80%" /><input
-				type="submit" />
-		</section>
+			type="submit" />
+		</div>
 	</div>
 </body>
 </html>
