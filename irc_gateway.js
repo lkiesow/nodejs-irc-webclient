@@ -19,6 +19,7 @@ function handler (req, res) {
 					res.writeHead(500);
 					return res.end('Error loading index.html');
 				}
+				res.setHeader( 'Content-Type', 'text/html;charset=UTF-8' );
 				res.writeHead(200);
 				res.end(data);
 			});

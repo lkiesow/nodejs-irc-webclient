@@ -37,19 +37,27 @@ function parse_msg( text ) {
 //var socket = io.connect( window.location.host );
 var socket = io.connect( window.location.host );
 
-$(document).ready(function (){
-		$("#ui").hide();
+$(document).ready( function () {
+	$("#ui").hide();
 
-		$("#connect-btn").click(function(e){
-			e.preventDefault();
-			$("#connect").hide();
-			$("#ui").show();
-			socket.send("CONNECT "+ $("#server").val());
-			socket.send("NICK "+ $("#nick").val() +"\n");
-			socket.send("USER "+ $("#nick").val() +" "+  $("#server").val().split(":")[0] + " blubb :"+$("#nick").val() +"\n");
-			});
+	$("#connect-btn").click( function(e) {
+		e.preventDefault();
+		/* UI things… */
+		$("#connect").hide();
+		$("#ui").show();
+		alert( [ $(window).innerHeight(), $('#bottom-box').outerHeight(), $('#top-box').height(), $('#top-box').outerHeight() ] );
+		alert( $(window).innerHeight() - $('#bottom-box').outerHeight() + $('#top-box').height() - $('#top-box').outerHeight() );
+		$('#top-box').height( $(window).innerHeight() - $('#bottom-box').outerHeight() - 5 );
+		$('#top-box ul').height( $('#top-box').innerHeight() - 2 );
 
-		});
+
+		/* Connect to IRC. */
+		socket.send("CONNECT "+ $("#server").val());
+		socket.send("NICK "+ $("#nick").val() +"\n");
+		socket.send("USER "+ $("#nick").val() +" "+  $("#server").val().split(":")[0] + " blubb :"+$("#nick").val() +"\n");
+	});
+
+});
 
 //socket.send("JOIN #las-vegas-uos\n");
 
@@ -69,28 +77,28 @@ socket.on('message', function (data) {
 	 });
 
 </script>
-<body>
-	<div id="connect" style="text-align: center;">
+<body style="padding: 0px; margin:0px;">
+	<div id="connect" style="text-align: center; margin:0px;">
 		<form>
 			<label for="server">Server: </label><input type="text" id="server" required value="irc.freenode.net:6667" /><br>
 			<input type="text" id="nick" required placeholder="Your nickname here" />
 			<input type="submit" id="connect-btn" value="connect" />
 		</form>
 	</div>
-	<div id="ui" style="display: table; width: 100%;">
-		<div id="top-box" style="height: 500px; display: table; width: 100%;">
-			<div style="display: table-row; width: 100%;">
-				<div style="display: table-cell;">
-				<ul style="height: 500px; width: 95%; font-size: smaller; display: block; overflow-y: scroll; overflow-x: hidden; list-style-type: none;" id="messages">
+	<div id="ui" style="display: table; width: 100%; padding: 0px; margin: 0px;">
+		<div id="top-box" style="height: 500px; display: table; width: 100%; padding: 0px; margin: 0px;">
+			<div style="display: table-row; width: 100%; padding: 0px; margin: 0px;">
+				<div style="display: table-cell; padding: 0px; margin: 0px;">
+				<ul style="height: 500px; width: 95%; font-size: smaller; display: block; overflow-y: scroll; overflow-x: hidden; list-style-type: none; margin: 0px;" id="messages">
 					<li>Welcome to IRC webclient</li>
 				</ul>
 			</div>
 			<div id="userlist"
-					style="width: 18%; height: 100%; background-color: #bbbbbb; display: table-cell; overflow: scroll;"></div>
+					style="width: 18%; height: 100%; background-color: #bbbbbb; display: table-cell; overflow: scroll; margin: 0px;"></div>
 			</div>
 		</div>
 		<div id="bottom-box">
-			<input type="text" id="msginput" style="width: 80%" /><input
+			<input type="text" id="msginput" style="width: 82%" /><input
 			type="submit" />
 		</div>
 	</div>
