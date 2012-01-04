@@ -4,23 +4,24 @@ var app = require('http').createServer(handler)
 , fs = require('fs')
 
 
+var port = process.argv.length == 3 ? Number( process.argv[2] ) : 8080;
 
 /**
  * \brief Webserver to deliver client files.
  * @param req the request
  * @param res the response
  */
-app.listen(8080);
+app.listen( port );
 function handler (req, res) {
-fs.readFile(__dirname + '/irc_client.html',
-function (err, data) {
-  if (err) {
-    res.writeHead(500);
-    return res.end('Error loading index.html');
-  }
-  res.writeHead(200);
-  res.end(data);
-});
+	fs.readFile(__dirname + '/irc_client.html',
+			function (err, data) {
+				if (err) {
+					res.writeHead(500);
+					return res.end('Error loading index.html');
+				}
+				res.writeHead(200);
+				res.end(data);
+			});
 }
 
 

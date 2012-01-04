@@ -35,7 +35,7 @@ function parse_msg( text ) {
 
 
 //var socket = io.connect( window.location.host );
-var socket = io.connect( '127.0.0.1:8080' );
+var socket = io.connect( window.location.host );
 
 $(document).ready(function (){
 		$("#ui").hide();
