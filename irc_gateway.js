@@ -40,7 +40,7 @@ io.sockets.on('connection', function (webSocket) {
 			var host = message.split(' ')[1].split(':')[0];
 			var port = message.split(' ')[1].split(':')[1];
 			console.log( 'connecting to '+host+':'+port+'…' );
-					tcpStream.connect( port, host );
+			tcpStream.connect( port, host );
 		}
 		else
 		{
@@ -53,6 +53,14 @@ io.sockets.on('connection', function (webSocket) {
 	 */
 	webSocket.on('disconnect', function () {
 		tcpStream.end();
+	});
+
+	/**
+	 * \brief This function forwards error messages to the client
+         */
+	tcpStream.addListener("error", function (error){
+		//forward error message to websocket
+		webSocket.send(error+"\r\n");
 	});
 	/**
 	 * \brief This function handles the data received from the IRC server.
