@@ -71,6 +71,11 @@ $(document).ready( function () {
 				socket.send('NICK ' + msg.split(' ')[1] + "\r\n" ); 
 			} else 	if ( msg.match( /^\/help.*/i ) ) {
 				showHelp();
+			} else 	if ( msg.match( /^\/part( .+)?$/i ) ) {
+				if(msg.split(' ')[1])  	//channel given
+					socket.send('PART ' + msg.split(' ')[1] + "\r\n" ); 
+				else			//no channel given -> use current channel
+					socket.send('PART ' + current_channel + "\r\n" ); 
 			} else if ( msg.match( /^\/.*/i ) ) {
 				showMsg( "error: Unknown command." );
 			} else {
@@ -104,11 +109,12 @@ function switch_channel( c ) {
 
 
 function showHelp(){
-	showMsg("*************************************"					, current_channel);
-	showMsg("Available commands:"							, current_channel);
-	showMsg("/join <channel>	: Joins the given Channel"			, current_channel);
-	showMsg("/nick <nickname>	: Changes the nick name to the given one"	, current_channel);
-	showMsg("*************************************"					, current_channel);
+	showMsg("*************************************"								, current_channel);
+	showMsg("Available commands:"										, current_channel);
+	showMsg("/join <channel>	: Joins the given Channel"						, current_channel);
+	showMsg("/nick <nickname>	: Changes the nick name to the given one"				, current_channel);
+	showMsg("/part [<channel>]	: Leaves the given channel or the current one if no channel is given"	, current_channel);
+	showMsg("*************************************"								, current_channel);
 }
 
 
@@ -128,6 +134,10 @@ socket.on('message', function (data) {
 					switch_channel( msg[2] );
 					$('#channel').append( '<li onclick="switch_channel( $(this).text() );" id="' 
 						+ msg[2].replace( /^#/, '' ) + '">' + msg[2] + '</li>' );
+
+				} else if ( msg.length > 2 && msg[1] == 'PART' ) {
+					switch_channel( 'server' );
+					$(msg[2]).remove();
 				} else if ( msg.length > 4 && msg[1] == '332' ) { /* Channel motd */
 					showMsg( lines[i].split(':')[2], msg[3] );
 				} else if ( msg.length > 4 && msg[1] == '353' ) { /* User in channel */
