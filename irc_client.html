@@ -65,19 +65,45 @@ $(document).ready( function () {
 			var msg = $('#msginput').val();
 			$('#msginput').val('');
 			/* Check for commands. */
+
+			/*	/join 		*/
 			if ( msg.match( /^\/join .+/i ) ) {
 				socket.send( 'JOIN ' + msg.split(' ')[1] + "\r\n" );
+
+			/*	/nick 		*/
 			} else 	if ( msg.match( /^\/nick .+/i ) ) {
-				socket.send('NICK ' + msg.split(' ')[1] + "\r\n" ); 
+				if (msg.split(' ')[1].match(/^([a-zA-Z0-9]|[-[]\\`\^{}])+$/))
+				{
+					socket.send('NICK ' + msg.split(' ')[1] + "\r\n" ); 
+					$("#nick").val(msg.split(' ')[1]); //save nick for recnnects...
+				}
+				else
+				{
+					showMsg("Error: Your Nickname contains illegal letters.", current_channel);
+				}
+				
+			/*	/help		*/
 			} else 	if ( msg.match( /^\/help.*/i ) ) {
 				showHelp();
+
+			/*	/connect	*/
+			} else 	if ( msg.match( /^\/connect .+/i ) ) {
+				socket.send("CONNECT "+ msg.split(' ')[1]);
+				socket.send("NICK "+ $("#nick").val() +"\n");
+				socket.send("USER "+ $("#nick").val() + ' '
+					+ $("#server").val().split(":")[0] 
+					+ " blubb :"+$("#nick").val() +"\n");
+
+			/*	/part		*/
 			} else 	if ( msg.match( /^\/part( .+)?$/i ) ) {
 				if(msg.split(' ')[1])  	//channel given
 					socket.send('PART ' + msg.split(' ')[1] + "\r\n" ); 
 				else			//no channel given -> use current channel
 					socket.send('PART ' + current_channel + "\r\n" ); 
+
+			/*	unknown command	*/
 			} else if ( msg.match( /^\/.*/i ) ) {
-				showMsg( "error: Unknown command." );
+				showMsg( "Error: Unknown command or too few arguments. Type /help for help.", current_channel );
 			} else {
 				/* No command. Send as message to current channel */
 				// TODO
@@ -111,9 +137,10 @@ function switch_channel( c ) {
 function showHelp(){
 	showMsg("*************************************"								, current_channel);
 	showMsg("Available commands:"										, current_channel);
-	showMsg("/join <channel>	: Joins the given Channel"						, current_channel);
-	showMsg("/nick <nickname>	: Changes the nick name to the given one"				, current_channel);
-	showMsg("/part [<channel>]	: Leaves the given channel or the current one if no channel is given"	, current_channel);
+	showMsg("/join &lt;channel&gt;	: Joins the given Channel"						, current_channel);
+	showMsg("/nick &lt;nickname&gt;	: Changes the nick name to the given one"				, current_channel);
+	showMsg("/part [&lt;channel&gt;]	: Leaves the given channel or the current one if no channel is given"	, current_channel);
+	showMsg("/connect &lt;hostname&gt;:&lt;port&gt;	: Connects to the given server (closes any open connection)"	, current_channel);
 	showMsg("*************************************"								, current_channel);
 }
 
