@@ -67,6 +67,10 @@ $(document).ready( function () {
 			/* Check for commands. */
 			if ( msg.match( /^\/join .+/i ) ) {
 				socket.send( 'JOIN ' + msg.split(' ')[1] + "\r\n" );
+			} else 	if ( msg.match( /^\/nick .+/i ) ) {
+				socket.send('NICK ' + msg.split(' ')[1] + "\r\n" ); 
+			} else 	if ( msg.match( /^\/help.*/i ) ) {
+				showHelp();
 			} else if ( msg.match( /^\/.*/i ) ) {
 				showMsg( "error: Unknown command." );
 			} else {
@@ -85,6 +89,14 @@ function showMsg( msg, channel ) {
 		var scrollbox = document.getElementById('messages');
 		scrollbox.scrollTop = scrollbox.scrollHeight;
 	});
+}
+
+function help(){
+	showMsg("*************************************"					, current_channel);
+	showMsg("Available commands:"							, current_channel);
+	showMsg("/join <channel>	: Joins the given Channel"			, current_channel);
+	showMsg("/nick <nickname>	: Changes the nick name to the given one"	, current_channel);
+	showMsg("*************************************"					, current_channel);
 }
 
 socket.on('message', function (data) {
