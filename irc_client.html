@@ -106,7 +106,8 @@ $(document).ready( function () {
 				showMsg( "Error: Unknown command or too few arguments. Type /help for help.", current_channel );
 			} else {
 				/* No command. Send as message to current channel */
-				// TODO
+				socket.send("PRIVMSG "+current_channel+" :"+msg+"\r\n");
+				showMsg($("#nick").val()+" : " + msg, current_channel);
 			}
 			return false;
 		} );
@@ -116,6 +117,7 @@ $(document).ready( function () {
 
 
 function showMsg( msg, channel ) {
+	//TODO: msg escapen!!!
 	$("#messages").append( '<li '
 			+ ( ( channel != current_channel ) ? 'style="display:none;"' : '' ) +
 			' class="' + channel.replace( /^#/, '' ) + '">' + msg + "</li>").ready(function(){ 
@@ -154,17 +156,33 @@ socket.on('message', function (data) {
 		} else if ( lines[i] != ''  ) {
 			var msg = parse_msg( lines[i] );
 			if ( msg.valid ) {
-				showMsg( msg.message, msg.channel );
+				showMsg( msg.user + " : " + msg.message, msg.channel );
 			} else {
 				msg = lines[i].split(' ');
 				if ( msg.length > 2 && msg[1] == 'JOIN' ) {
-					switch_channel( msg[2] );
-					$('#channel').append( '<li onclick="switch_channel( $(this).text() );" id="' 
-						+ msg[2].replace( /^#/, '' ) + '">' + msg[2] + '</li>' );
+					if(msg[0].slice(1, msg[0].indexOf('!'))== $('#nick').val())
+					{
+						// own JOIN message -> open channel
+						switch_channel( msg[2] );
+						$('#channel').append( '<li onclick="switch_channel( $(this).text() );" id="' 
+							+ msg[2].replace( /^#/, '' ) + '">' + msg[2] + '</li>' );
+					}
+					else
+					{
+						// other user's JOIN -> update user list
+					}
 
 				} else if ( msg.length > 2 && msg[1] == 'PART' ) {
-					switch_channel( 'server' );
-					$(msg[2]).remove();
+					if(msg[0].slice(1, msg[0].indexOf('!')) == $('#nick').val())
+					{
+						// own PART message -> leave channel
+						switch_channel( 'server' );
+						$(msg[2]).remove();
+					}
+					else
+					{
+						//other user's PART message -> update user lists of affected channels
+					}
 				} else if ( msg.length > 4 && msg[1] == '332' ) { /* Channel motd */
 					showMsg( lines[i].split(':')[2], msg[3] );
 				} else if ( msg.length > 4 && msg[1] == '353' ) { /* User in channel */
