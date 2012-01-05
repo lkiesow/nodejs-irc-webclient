@@ -34,18 +34,26 @@ io.sockets.on('connection', function (webSocket) {
 	tcpStream.setTimeout(0);
 	tcpStream.setEncoding("ascii");
 	webSocket.on('message', function (message) {
-		if(message.split(' ')[0] == 'CONNECT')
+		try
 		{
-			//connect to the given IRC server via TCP
-			var host = message.split(' ')[1].split(':')[0];
-			var port = message.split(' ')[1].split(':')[1];
-			console.log( 'connecting to '+host+':'+port+'…' );
-			tcpStream.connect( port, host );
+			if(message.split(' ')[0] == 'CONNECT')
+			{
+				//connect to the given IRC server via TCP
+				var host = message.split(' ')[1].split(':')[0];
+				var port = message.split(' ')[1].split(':')[1];
+				console.log( 'connecting to '+host+':'+port+'…' );
+				tcpStream.destroy();
+				tcpStream.connect( port, host );
+			}
+			else
+			{
+				//forward message to the remote server via TCP
+				tcpStream.write(message);
+			}
 		}
-		else
+		catch (e)
 		{
-			//forward message to the remote server via TCP
-			tcpStream.write(message);
+			webSocket.send(e);
 		}
 	});
 	/**
@@ -68,6 +76,14 @@ io.sockets.on('connection', function (webSocket) {
 	tcpStream.addListener("data", function (data) {
 		//forward data to websocket
 		webSocket.send(data);
+	});
+	
+	
+	/**
+	 * \brief This function notifies the client when the connection to the server is closed.
+	 **/
+	tcpStream.addListener("close", function (){
+		webSocket.send("Server closed connection. You are offline. Use /connect to connect.");
 	});
 });
 
