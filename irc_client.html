@@ -39,6 +39,8 @@ var socket = io.connect( window.location.host );
 
 $(document).ready( function () {
 	$("#ui").hide();
+	$('#connect').css( 'padding-top', 
+		( ( $(window).innerHeight() - $('#connect').outerHeight() ) / 2 ) + 'px' );
 
 	$("#connect-btn").click( function(e) {
 		e.preventDefault();
@@ -109,7 +111,7 @@ socket.on('message', function (data) {
 		<div id="top-box" style="height: 500px; display: table; width: 100%; padding: 0px; margin: 0px;">
 			<div style="display: table-row; width: 100%; padding: 0px; margin: 0px;">
 				<div style="display: table-cell; padding: 0px; margin: 0px;">
-				<ul style="height: 500px; width: 95%; font-size: smaller; display: block; overflow-y: scroll; overflow-x: hidden; list-style-type: none; margin: 0px;" id="messages">
+				<ul style="height: 500px; font-size: smaller; display: block; overflow-y: scroll; overflow-x: hidden; list-style-type: none; margin: 0px;" id="messages">
 					<li>Welcome to IRC webclient</li>
 				</ul>
 			</div>
