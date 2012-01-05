@@ -101,9 +101,12 @@ $(document).ready( function () {
 				else			//no channel given -> use current channel
 					socket.send('PART ' + current_channel + "\r\n" ); 
 
+			//TODO: /query			
+
 			/*	unknown command	*/
 			} else if ( msg.match( /^\/.*/i ) ) {
 				showMsg( "Error: Unknown command or too few arguments. Type /help for help.", current_channel );
+
 			} else {
 				/* No command. Send as message to current channel */
 				socket.send("PRIVMSG "+current_channel+" :"+msg+"\r\n");
@@ -116,8 +119,9 @@ $(document).ready( function () {
 });
 
 
-function showMsg( msg, channel ) {
+function showMsg( msg, channel ){
 	msg = $('<div/>').text(msg).html();  // escape msg
+	//TODO: check if channel exists. If not -> add it as a new one (query)
 	$("#messages").append( '<li '
 			+ ( ( channel != current_channel ) ? 'style="display:none;"' : '' ) +
 			' class="' + channel.replace( /^#/, '' ) + '">' + msg + "</li>").ready(function(){ 
@@ -169,7 +173,7 @@ socket.on('message', function (data) {
 					}
 					else
 					{
-						// other user's JOIN -> update user list
+						// TODO: other user's JOIN -> update user list
 					}
 
 				} else if ( msg.length > 2 && msg[1] == 'PART' ) {
@@ -181,7 +185,7 @@ socket.on('message', function (data) {
 					}
 					else
 					{
-						//other user's PART message -> update user lists of affected channels
+						//TODO: other user's PART message -> update user lists of affected channels
 					}
 				} else if ( msg.length > 4 && msg[1] == '332' ) { /* Channel motd */
 					showMsg( lines[i].split(':')[2], msg[3] );
@@ -195,6 +199,7 @@ socket.on('message', function (data) {
 	}
 });
 
+//TODO: add a cool user list for the channels
 
 </script>
 <body style="padding: 0px; margin:0px;">
@@ -217,7 +222,6 @@ socket.on('message', function (data) {
 					style="width: 18%; height: 100%; background-color: #bbbbbb; display: table-cell; overflow-y: scroll; overflow-x: hidden; margin: 0px;">
 					<ul style="font-size: smaller; display: block; list-style-type: none;" id="channel">
 						<li id="server" onclick="switch_channel( $(this).text() );">server</li>
-						<!-- TODO: Beim draufklicken nur <li>s mit der Klasse <<channel>> anzeigen. alle anderen ausblenden -->
 					</ul>
 				</div>
 			</div>
