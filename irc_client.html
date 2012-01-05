@@ -45,8 +45,6 @@ $(document).ready( function () {
 		/* UI things… */
 		$("#connect").hide();
 		$("#ui").show();
-		alert( [ $(window).innerHeight(), $('#bottom-box').outerHeight(), $('#top-box').height(), $('#top-box').outerHeight() ] );
-		alert( $(window).innerHeight() - $('#bottom-box').outerHeight() + $('#top-box').height() - $('#top-box').outerHeight() );
 		$('#top-box').height( $(window).innerHeight() - $('#bottom-box').outerHeight() - 5 );
 		$('#top-box ul').height( $('#top-box').innerHeight() - 2 );
 
@@ -54,27 +52,49 @@ $(document).ready( function () {
 		/* Connect to IRC. */
 		socket.send("CONNECT "+ $("#server").val());
 		socket.send("NICK "+ $("#nick").val() +"\n");
-		socket.send("USER "+ $("#nick").val() +" "+  $("#server").val().split(":")[0] + " blubb :"+$("#nick").val() +"\n");
+		socket.send("USER "+ $("#nick").val() + ' '
+			+ $("#server").val().split(":")[0] 
+			+ " blubb :"+$("#nick").val() +"\n");
+
+		/* Add handler to input form. */
+		$('#bottom-box form').submit( function() {
+			var msg = $('#msginput').val();
+			$('#msginput').val('');
+			/* Check for commands. */
+			if ( msg.match( /^\/join .+/i ) ) {
+				socket.send( 'JOIN ' + msg.split(' ')[1] + "\r\n" );
+			} else if ( msg.match( /^\/.*/i ) ) {
+				showMsg( "error: Unknown command." );
+			} else {
+				/* No command. Send as message to current channel */
+				// TODO
+			}
+			return false;
+		} );
 	});
 
 });
 
-//socket.send("JOIN #las-vegas-uos\n");
+
+function showMsg( msg ) {
+	$("#messages").append( "<li>" + msg + "</li>").ready(function(){ 
+		var scrollbox = document.getElementById('messages');
+		scrollbox.scrollTop = scrollbox.scrollHeight;
+	});
+}
 
 socket.on('message', function (data) {
-		var lines = data.split( "\r\n" );
-		for ( var i = 0; i < lines.length; i++ )  {
-			// play ping pong
-			if ( lines[i].match( /^PING.*/ ) ) {
-				socket.send( 'PONG ' + lines[i].split(' ')[1] + '\r\n' );
-			} else if ( lines[i] != ''  ) {
-				$("#messages").append( "<li>" + lines[i] + "</li>")
-					.stop().animate({scrollTop: 
-						$("#messages").children().last().offset().top
-						+ $("#messages").children().last().outerHeight() + 100 }, 500);
-			}
+	var lines = data.split( "\r\n" );
+	for ( var i = 0; i < lines.length; i++ )  {
+		// play ping pong
+		if ( lines[i].match( /^PING.*/ ) ) {
+			socket.send( 'PONG ' + lines[i].split(' ')[1] + '\r\n' );
+		} else if ( lines[i] != ''  ) {
+			showMsg( lines[i] );
 		}
-	 });
+	}
+});
+
 
 </script>
 <body style="padding: 0px; margin:0px;">
@@ -98,8 +118,10 @@ socket.on('message', function (data) {
 			</div>
 		</div>
 		<div id="bottom-box">
-			<input type="text" id="msginput" style="width: 82%" /><input
-			type="submit" />
+			<form action="#">
+				<input type="text" id="msginput" style="width: 82%" />
+				<input type="submit" id="postmsg" />
+		</form>
 		</div>
 	</div>
 </body>
