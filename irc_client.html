@@ -85,11 +85,23 @@ $(document).ready( function () {
 
 
 function showMsg( msg, channel ) {
-	$("#messages").append( '<li class="' + channel + '">' + msg + "</li>").ready(function(){ 
+	$("#messages").append( '<li '
+			+ ( ( channel != current_channel ) ? 'style="display:none;"' : '' ) +
+			' class="' + channel.replace( /^#/, '' ) + '">' + msg + "</li>").ready(function(){ 
 		var scrollbox = document.getElementById('messages');
 		scrollbox.scrollTop = scrollbox.scrollHeight;
 	});
 }
+
+
+function switch_channel( c ) {
+
+	$('#messages li').css( 'display', 'none' );
+	$('li.' + c.replace( /^#/, '' ) ).css( 'display', 'block' );
+	current_channel = c;
+
+}
+
 
 function showHelp(){
 	showMsg("*************************************"					, current_channel);
@@ -98,6 +110,7 @@ function showHelp(){
 	showMsg("/nick <nickname>	: Changes the nick name to the given one"	, current_channel);
 	showMsg("*************************************"					, current_channel);
 }
+
 
 socket.on('message', function (data) {
 	var lines = data.split( "\r\n" );
@@ -110,7 +123,18 @@ socket.on('message', function (data) {
 			if ( msg.valid ) {
 				showMsg( msg.message, msg.channel );
 			} else {
-				showMsg( lines[i], 'server' );
+				msg = lines[i].split(' ');
+				if ( msg.length > 2 && msg[1] == 'JOIN' ) {
+					switch_channel( msg[2] );
+					$('#channel').append( '<li onclick="switch_channel( $(this).text() );" id="' 
+						+ msg[2].replace( /^#/, '' ) + '">' + msg[2] + '</li>' );
+				} else if ( msg.length > 4 && msg[1] == '332' ) { /* Channel motd */
+					showMsg( lines[i].split(':')[2], msg[3] );
+				} else if ( msg.length > 4 && msg[1] == '353' ) { /* User in channel */
+					showMsg( 'User in channel: ' + lines[i].split(':')[2], msg[4] );
+				} else {
+					showMsg( lines[i], 'server' );
+				}
 			}
 		}
 	}
@@ -135,10 +159,12 @@ socket.on('message', function (data) {
 				</ul>
 			</div>
 			<div id="userlist"
-					style="width: 18%; height: 100%; background-color: #bbbbbb; display: table-cell; overflow-y: scroll; overflow-x: hidden; margin: 0px;"></div>
+					style="width: 18%; height: 100%; background-color: #bbbbbb; display: table-cell; overflow-y: scroll; overflow-x: hidden; margin: 0px;">
 					<ul style="font-size: smaller; display: block; list-style-type: none;" id="channel">
-						<li id="server">server</li> <!-- TODO: Beim draufklicken nur <li>s mit der Klasse <<channel>> anzeigen. alle anderen ausblenden -->
+						<li id="server" onclick="switch_channel( $(this).text() );">server</li>
+						<!-- TODO: Beim draufklicken nur <li>s mit der Klasse <<channel>> anzeigen. alle anderen ausblenden -->
 					</ul>
+				</div>
 			</div>
 		</div>
 		<div id="bottom-box">
