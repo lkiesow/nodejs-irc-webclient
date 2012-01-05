@@ -117,7 +117,7 @@ $(document).ready( function () {
 
 
 function showMsg( msg, channel ) {
-	//TODO: msg escapen!!!
+	msg = $('<div/>').text(msg).html();  // escape msg
 	$("#messages").append( '<li '
 			+ ( ( channel != current_channel ) ? 'style="display:none;"' : '' ) +
 			' class="' + channel.replace( /^#/, '' ) + '">' + msg + "</li>").ready(function(){ 
