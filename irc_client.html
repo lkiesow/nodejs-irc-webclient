@@ -121,7 +121,6 @@ $(document).ready( function () {
 
 function showMsg( msg, channel ){
 	msg = $('<div/>').text(msg).html();  // escape msg
-	//TODO: check if channel exists. If not -> add it as a new one (query)
 	$("#messages").append( '<li '
 			+ ( ( channel != current_channel ) ? 'style="display:none;"' : '' ) +
 			' class="' + channel.replace( /^#/, '' ) + '">' + msg + "</li>").ready(function(){ 
@@ -160,6 +159,7 @@ socket.on('message', function (data) {
 		} else if ( lines[i] != ''  ) {
 			var msg = parse_msg( lines[i] );
 			if ( msg.valid ) {
+				//TODO: check if channel exists. If not -> add it as a new one (query)
 				showMsg( msg.user + " : " + msg.message, msg.channel );
 			} else {
 				msg = lines[i].split(' ');
