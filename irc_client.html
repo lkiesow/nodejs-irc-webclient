@@ -129,7 +129,16 @@ $(document).ready( function () {
 				else			//no channel given -> use current channel
 					socket.send('PART ' + current_channel + "\r\n" ); 
 
-			//TODO: /query			
+			/*	/query		*/
+			} else 	if ( msg.match( /^\/query .+/i ) ) {
+				var username = msg.split(' ')[1];
+				if ($('#'+username).length == 0)
+				{
+					switch_channel( username );
+					$('#channel').append( '<li onclick="switch_channel($(this).text() );" id="' 
+						+ username + '">' + username + '</li>' );
+					showMsg('Private conversation with '+username, current_channel);
+				}
 
 			/*	unknown command	*/
 			} else if ( msg.match( /^\/.*/i ) ) {
@@ -187,8 +196,11 @@ socket.on('message', function (data) {
 		} else if ( lines[i] != ''  ) {
 			var msg = parse_msg( lines[i] );
 			if ( msg.valid ) {
-				//TODO: check if channel exists. If not -> add it as a new one (query)
-				showMsg( msg.user + ' : ' + msg.message, msg.channel );
+				// check if channel exists. If not -> add it as a new one (query)
+				if ($('#'+msg.receiver.replace(/^#/, '')).length == 0)
+					$('#channel').append( '<li onclick="switch_channel($(this).text() );" id="' 
+						+ receiver + '">' + receiver + '</li>' );
+				showMsg( msg.user + ' : ' + msg.message, msg.receiver );
 			} else {
 				msg = lines[i].split(' ');
 				if ( msg.length > 2 && msg[1] == 'JOIN' ) {
