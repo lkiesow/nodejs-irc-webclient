@@ -140,6 +140,14 @@ $(document).ready( function () {
 					showMsg('Private conversation with '+username, current_channel);
 				}
 
+			/*	/msg		*/
+			} else 	if ( msg.match( /^\/msg .+ .+/i ) ) {
+				var username = msg.split(' ')[1];
+				var message = msg.substr(msg.substr(5).indexOf(' ')+6);
+				socket.send("PRIVMSG "+username+" :"+message+"\r\n");
+				showMsg($("#nick").val()+ " -> "+ username +" : " + message, "server");
+				showMsg($("#nick").val()+ " : " + message, username);
+
 			/*	unknown command	*/
 			} else if ( msg.match( /^\/.*/i ) ) {
 				showMsg( "Error: Unknown command or too few arguments. Type /help for help.", current_channel );
@@ -184,6 +192,7 @@ function showHelp(){
 	showMsg("/part [<channel>]		: Leaves the given channel or the current one if no channel is given", current_channel);
 	showMsg("/connect <hostname>:<port>	: Connects to the given server (closes any open connection)", current_channel);
 	showMsg("/query <user>			: Opens a private chat with the given user", current_channel);
+	showMsg("/msg <user> <message>		: Sends a message to the given user without opening a new chat.", current_channel);
 	showMsg("*************************************"	, current_channel);
 }
 
