@@ -6,6 +6,34 @@
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<style type="text/css">
+	ul#channel li {
+		cursor: pointer;
+	}
+	div {
+		padding: 0px;
+		margin: 0px;
+	}
+	ul {
+		font-size: smaller;
+		display: block;
+		list-style-type: none;
+	}
+	div#ui ul {
+		height: 500px;
+		overflow-y: scroll;
+		overflow-x: hidden;
+		margin: 0px;
+	}
+	div#userlist {
+		width: 18%;
+		height: 100%;
+		background-color: #bbbbbb;
+		display: table-cell;
+		overflow-y: scroll;
+		overflow-x: hidden;
+	}
+</style>
 <script type="text/javascript">
 
 var current_channel = 'server';
@@ -140,13 +168,13 @@ function switch_channel( c ) {
 
 
 function showHelp(){
-	showMsg("*************************************"								, current_channel);
-	showMsg("Available commands:"										, current_channel);
-	showMsg("/join &lt;channel&gt;	: Joins the given Channel"						, current_channel);
-	showMsg("/nick &lt;nickname&gt;	: Changes the nick name to the given one"				, current_channel);
-	showMsg("/part [&lt;channel&gt;]	: Leaves the given channel or the current one if no channel is given"	, current_channel);
-	showMsg("/connect &lt;hostname&gt;:&lt;port&gt;	: Connects to the given server (closes any open connection)"	, current_channel);
-	showMsg("*************************************"								, current_channel);
+	showMsg("*************************************", current_channel);
+	showMsg("Available commands:", current_channel);
+	showMsg("/join &lt;channel&gt;	: Joins the given Channel", current_channel);
+	showMsg("/nick &lt;nickname&gt;	: Changes the nick name to the given one", current_channel);
+	showMsg("/part [&lt;channel&gt;]	: Leaves the given channel or the current one if no channel is given", current_channel);
+	showMsg("/connect &lt;hostname&gt;:&lt;port&gt;	: Connects to the given server (closes any open connection)", current_channel);
+	showMsg("*************************************"	, current_channel);
 }
 
 
@@ -160,7 +188,7 @@ socket.on('message', function (data) {
 			var msg = parse_msg( lines[i] );
 			if ( msg.valid ) {
 				//TODO: check if channel exists. If not -> add it as a new one (query)
-				showMsg( msg.user + " : " + msg.message, msg.channel );
+				showMsg( '<em>' + msg.user + '</em> : ' + msg.message, msg.channel );
 			} else {
 				msg = lines[i].split(' ');
 				if ( msg.length > 2 && msg[1] == 'JOIN' ) {
@@ -188,9 +216,12 @@ socket.on('message', function (data) {
 						//TODO: other user's PART message -> update user lists of affected channels
 					}
 				} else if ( msg.length > 4 && msg[1] == '332' ) { /* Channel motd */
-					showMsg( lines[i].split(':')[2], msg[3] );
+					showMsg( lines[i].replace( /^:[^:]*:/, '' ), msg[3] );
 				} else if ( msg.length > 4 && msg[1] == '353' ) { /* User in channel */
 					showMsg( 'User in channel: ' + lines[i].split(':')[2], msg[4] );
+				} else if ( msg.length > 2 && msg[1] == 'MODE' ) { /* Changed user mode. */
+					showMsg( lines[i].replace( /^.* MODE /, 'Mode ' ) + ' by ' +
+							msg[0].replace( /^:/, '' ).replace( /!.*$/, '' ), msg[2]);
 				} else {
 					showMsg( lines[i], 'server' );
 				}
@@ -203,24 +234,24 @@ socket.on('message', function (data) {
 
 </script>
 <body style="padding: 0px; margin:0px;">
-	<div id="connect" style="text-align: center; margin:0px;">
+	<div id="connect" style="text-align: center;">
 		<form>
-			<label for="server">Server: </label><input type="text" id="server" required value="irc.freenode.net:6667" /><br>
+			<label for="server">Server: </label>
+			<input type="text" id="server" required value="irc.freenode.net:6667" /><br />
 			<input type="text" id="nick" required placeholder="Your nickname here" />
 			<input type="submit" id="connect-btn" value="connect" />
 		</form>
 	</div>
-	<div id="ui" style="display: table; width: 100%; padding: 0px; margin: 0px;">
-		<div id="top-box" style="height: 500px; display: table; width: 100%; padding: 0px; margin: 0px;">
-			<div style="display: table-row; width: 100%; padding: 0px; margin: 0px;">
-				<div style="display: table-cell; padding: 0px; margin: 0px;">
-				<ul style="height: 500px; font-size: smaller; display: block; overflow-y: scroll; overflow-x: hidden; list-style-type: none; margin: 0px;" id="messages">
-					<li>Welcome to IRC webclient</li>
-				</ul>
-			</div>
-			<div id="userlist"
-					style="width: 18%; height: 100%; background-color: #bbbbbb; display: table-cell; overflow-y: scroll; overflow-x: hidden; margin: 0px;">
-					<ul style="font-size: smaller; display: block; list-style-type: none;" id="channel">
+	<div id="ui" style="width: 100%; ">
+		<div id="top-box" style="display: table; width: 100%;">
+			<div style="display: table-row; width: 100%;">
+				<div style="display: table-cell;">
+					<ul id="messages">
+						<li>Welcome to IRC webclient</li>
+					</ul>
+				</div>
+				<div id="userlist">
+					<ul id="channel">
 						<li id="server" onclick="switch_channel( $(this).text() );">server</li>
 					</ul>
 				</div>
