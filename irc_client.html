@@ -179,10 +179,11 @@ function switch_channel( c ) {
 function showHelp(){
 	showMsg("*************************************", current_channel);
 	showMsg("Available commands:", current_channel);
-	showMsg("/join <channel>	: Joins the given Channel", current_channel);
-	showMsg("/nick <nickname>	: Changes the nick name to the given one", current_channel);
-	showMsg("/part [<channel>]	: Leaves the given channel or the current one if no channel is given", current_channel);
+	showMsg("/join <channel>		: Joins the given Channel", current_channel);
+	showMsg("/nick <nickname>		: Changes the nick name to the given one", current_channel);
+	showMsg("/part [<channel>]		: Leaves the given channel or the current one if no channel is given", current_channel);
 	showMsg("/connect <hostname>:<port>	: Connects to the given server (closes any open connection)", current_channel);
+	showMsg("/query <user>			: Opens a private chat with the given user", current_channel);
 	showMsg("*************************************"	, current_channel);
 }
 
@@ -199,7 +200,7 @@ socket.on('message', function (data) {
 				// check if channel exists. If not -> add it as a new one (query)
 				if ($('#'+msg.receiver.replace(/^#/, '')).length == 0)
 					$('#channel').append( '<li onclick="switch_channel($(this).text() );" id="' 
-						+ receiver + '">' + receiver + '</li>' );
+						+ msg.receiver + '">' + msg.receiver + '</li>' );
 				showMsg( msg.user + ' : ' + msg.message, msg.receiver );
 			} else {
 				msg = lines[i].split(' ');
